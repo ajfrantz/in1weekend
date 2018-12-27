@@ -1,0 +1,7 @@
+[package]
+name = "in1weekend"
+version = "0.1.0"
+authors = ["AJ Frantz <aj@ajfrantz.com>"]
+edition = "2018"
+
+[dependencies]
