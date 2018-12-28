@@ -65,9 +65,9 @@ impl ops::Neg for Vec3 {
     }
 }
 
-impl ops::Add for Vec3 {
+impl ops::Add for &Vec3 {
     type Output = Vec3;
-    fn add(self, other: Vec3) -> Vec3 {
+    fn add(self, other: &Vec3) -> Vec3 {
         Vec3 {
             e: [
                 self.e[0] + other.e[0],
@@ -75,6 +75,27 @@ impl ops::Add for Vec3 {
                 self.e[2] + other.e[2],
             ],
         }
+    }
+}
+
+impl ops::Add<Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn add(self, other: Vec3) -> Vec3 {
+        self + &other
+    }
+}
+
+impl ops::Add<&Vec3> for Vec3 {
+    type Output = Vec3;
+    fn add(self, other: &Vec3) -> Vec3 {
+        &self + other
+    }
+}
+
+impl ops::Add for Vec3 {
+    type Output = Vec3;
+    fn add(self, other: Vec3) -> Vec3 {
+        &self + &other
     }
 }
 
@@ -95,9 +116,9 @@ impl ops::Add<f32> for Vec3 {
     }
 }
 
-impl ops::Sub for Vec3 {
+impl ops::Sub for &Vec3 {
     type Output = Vec3;
-    fn sub(self, other: Vec3) -> Vec3 {
+    fn sub(self, other: &Vec3) -> Vec3 {
         Vec3 {
             e: [
                 self.e[0] - other.e[0],
@@ -105,6 +126,27 @@ impl ops::Sub for Vec3 {
                 self.e[2] - other.e[2],
             ],
         }
+    }
+}
+
+impl ops::Sub<Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: Vec3) -> Vec3 {
+        self - &other
+    }
+}
+
+impl ops::Sub<&Vec3> for Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: &Vec3) -> Vec3 {
+        &self - other
+    }
+}
+
+impl ops::Sub for Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: Vec3) -> Vec3 {
+        &self - &other
     }
 }
 
@@ -116,7 +158,41 @@ impl ops::SubAssign for Vec3 {
     }
 }
 
-impl ops::Mul<f32> for Vec3 {
+impl ops::Mul for &Vec3 {
+    type Output = Vec3;
+    fn mul(self, other: &Vec3) -> Vec3 {
+        Vec3 {
+            e: [
+                self.e[0] * other.e[0],
+                self.e[1] * other.e[1],
+                self.e[2] * other.e[2],
+            ],
+        }
+    }
+}
+
+impl ops::Mul<Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn mul(self, other: Vec3) -> Vec3 {
+        self * &other
+    }
+}
+
+impl ops::Mul<&Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, other: &Vec3) -> Vec3 {
+        &self * other
+    }
+}
+
+impl ops::Mul for Vec3 {
+    type Output = Vec3;
+    fn mul(self, other: Vec3) -> Vec3 {
+        &self * &other
+    }
+}
+
+impl ops::Mul<f32> for &Vec3 {
     type Output = Vec3;
     fn mul(self, scalar: f32) -> Vec3 {
         Vec3 {
@@ -125,10 +201,24 @@ impl ops::Mul<f32> for Vec3 {
     }
 }
 
+impl ops::Mul<&Vec3> for f32 {
+    type Output = Vec3;
+    fn mul(self, vec: &Vec3) -> Vec3 {
+        vec * self
+    }
+}
+
+impl ops::Mul<f32> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, scalar: f32) -> Vec3 {
+        &self * scalar
+    }
+}
+
 impl ops::Mul<Vec3> for f32 {
     type Output = Vec3;
     fn mul(self, vec: Vec3) -> Vec3 {
-        vec * self
+        self * &vec
     }
 }
 

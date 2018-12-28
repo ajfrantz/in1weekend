@@ -3,32 +3,29 @@ extern crate rand;
 mod camera;
 mod hitable;
 mod hitable_list;
-mod vec3;
+mod material;
 mod ray;
 mod sphere;
+mod vec3;
 
 use rand::prelude::*;
 
 use self::camera::Camera;
 use self::hitable::Hitable;
 use self::hitable_list::HitableList;
-use self::vec3::Vec3;
+use self::material::Material;
 use self::ray::Ray;
 use self::sphere::Sphere;
+use self::vec3::Vec3;
 
-fn random_in_unit_sphere() -> Vec3 {
-    loop {
-        let p = 2.0 * Vec3::new(random::<f32>(), random::<f32>(), random::<f32>()) - Vec3::new(1., 1., 1.);
-        if p.squared_norm() < 1.0 {
-            return p;
-        }
-    }
-}
-
-fn color(r: &Ray, world: &HitableList) -> Vec3 {
+fn color(r: &Ray, world: &HitableList, bounce: i32) -> Vec3 {
     if let Some(hit) = world.hit(r, 0.001, std::f32::MAX) {
-        let target = hit.p + hit.normal + random_in_unit_sphere();
-        0.5 * color(&Ray { origin: hit.p, direction: target - hit.p }, world)
+        if bounce < 50 {
+            if let Some(scatter) = hit.material.scatter(r, &hit.p, &hit.normal) {
+                return scatter.attenuation * color(&scatter.ray, world, bounce + 1);
+            }
+        }
+        Vec3::new(0., 0., 0.)
     } else {
         let unit_direction = r.direction.unit();
         let t = 0.5 * (unit_direction.y() + 1.0);
@@ -44,8 +41,10 @@ fn main() {
     print!("P3\n{} {}\n255\n", nx, ny);
 
     let world = HitableList { spheres: vec![
-        Sphere { center: Vec3::new(0., 0., -1.), radius: 0.5 },
-        Sphere { center: Vec3::new(0., -100.5, -1.), radius: 100. },
+        Sphere { center: Vec3::new(0., 0., -1.), radius: 0.5, material: Material::Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) } },
+        Sphere { center: Vec3::new(0., -100.5, -1.), radius: 100., material: Material::Lambertian { albedo: Vec3::new(0.8, 0.8, 0.0) } },
+        Sphere { center: Vec3::new(1., 0., -1.), radius: 0.5, material: Material::Metal { albedo: Vec3::new(0.8, 0.6, 0.2), fuzz: 1.0 } },
+        Sphere { center: Vec3::new(-1., 0., -1.), radius: 0.5, material: Material::Metal { albedo: Vec3::new(0.8, 0.8, 0.8), fuzz: 0.3 } },
     ]};
 
     let camera = Camera::new();
@@ -57,7 +56,7 @@ fn main() {
                 let u = (i as f32 + random::<f32>()) / nx as f32;
                 let v = (j as f32 + random::<f32>()) / ny as f32;
                 let r = camera.get_ray(u, v);
-                col += color(&r, &world);
+                col += color(&r, &world, 0);
             }
 
             col /= ns as f32;

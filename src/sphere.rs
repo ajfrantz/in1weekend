@@ -1,10 +1,12 @@
 use super::hitable::{HitRecord, Hitable};
+use super::material::Material;
 use super::ray::Ray;
 use super::vec3::Vec3;
 
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f32,
+    pub material: Material,
 }
 
 impl Hitable for Sphere {
@@ -23,14 +25,24 @@ impl Hitable for Sphere {
         if (t < t_max) && (t > t_min) {
             let p = r.point_at_parameter(t);
             let normal = (p - self.center) / self.radius;
-            return Some(HitRecord { t, p, normal });
+            return Some(HitRecord {
+                t,
+                p,
+                normal,
+                material: self.material,
+            });
         }
 
         let t = (-b + discriminant_root) / a;
         if (t < t_max) && (t > t_min) {
             let p = r.point_at_parameter(t);
             let normal = (p - self.center) / self.radius;
-            return Some(HitRecord { t, p, normal });
+            return Some(HitRecord {
+                t,
+                p,
+                normal,
+                material: self.material,
+            });
         }
 
         None
