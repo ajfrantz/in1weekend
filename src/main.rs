@@ -33,26 +33,46 @@ fn color(r: &Ray, world: &HitableList, bounce: i32) -> Vec3 {
     }
 }
 
+fn random_scene() -> HitableList {
+    let mut world = HitableList { spheres: Vec::new() };
+    // "the ground"
+    world.spheres.push(Sphere { center: Vec3::new(0., -1000., 0.), radius: 1000., material: Material::Lambertian { albedo: Vec3::new(0.5, 0.5, 0.5) } });
+    // little spheres
+    for a in -11..11 {
+        for b in -11..11 {
+            let center = Vec3::new(a as f32 + 0.9 * random::<f32>(), 0.2, b as f32 + 0.9 * random::<f32>());
+            if (center - Vec3::new(4., 0.2, 0.)).norm() <= 0.9 { continue; }
+
+            let material = match random::<f32>() {
+                x if x < 0.8 => Material::Lambertian { albedo: Vec3::new(random::<f32>()*random::<f32>(), random::<f32>()*random::<f32>(), random::<f32>()*random::<f32>()) },
+                x if x < 0.95 => Material::Metal { albedo: Vec3::new(0.5 * (1. + random::<f32>()), 0.5 * (1. + random::<f32>()), 0.5 * (1. + random::<f32>())), fuzz: 0.5 * random::<f32>() },
+                _ => Material::Dielectric { refraction_index: 1.5 },
+            };
+            world.spheres.push(Sphere { center, radius: 0.2, material });
+        }
+    }
+    // the centerpiece spheres
+    world.spheres.push(Sphere { center: Vec3::new( 0., 1., 0.), radius: 1., material: Material::Dielectric { refraction_index: 1.5 } });
+    world.spheres.push(Sphere { center: Vec3::new(-4., 1., 0.), radius: 1., material: Material::Lambertian { albedo: Vec3::new(0.4, 0.2, 0.1) } });
+    world.spheres.push(Sphere { center: Vec3::new( 4., 1., 0.), radius: 1., material: Material::Metal { albedo: Vec3::new(0.7, 0.6, 0.5), fuzz: 0. } });
+
+    world
+}
+
 fn main() {
-    let nx = 200;
-    let ny = 100;
+    let nx = 1920;
+    let ny = 1080;
     let ns = 100;
 
     print!("P3\n{} {}\n255\n", nx, ny);
 
-    let world = HitableList { spheres: vec![
-        Sphere { center: Vec3::new(0., 0., -1.), radius: 0.5, material: Material::Lambertian { albedo: Vec3::new(0.1, 0.2, 0.5) } },
-        Sphere { center: Vec3::new(0., -100.5, -1.), radius: 100., material: Material::Lambertian { albedo: Vec3::new(0.8, 0.8, 0.0) } },
-        Sphere { center: Vec3::new(1., 0., -1.), radius: 0.5, material: Material::Metal { albedo: Vec3::new(0.8, 0.6, 0.2), fuzz: 1.0 } },
-        Sphere { center: Vec3::new(-1., 0., -1.), radius: 0.5, material: Material::Dielectric { refraction_index: 1.5 } },
-        Sphere { center: Vec3::new(-1., 0., -1.), radius: -0.45, material: Material::Dielectric { refraction_index: 1.5 } },
-    ]};
+    let world = random_scene();
 
-    let lookfrom = Vec3::new(3., 3., 2.);
-    let lookat = Vec3::new(0., 0., -1.);
+    let lookfrom = Vec3::new(13., 2., 3.);
+    let lookat = Vec3::new(0., 0., 0.);
     let up = Vec3::new(0., 1., 0.);
-    let dist_to_focus = (lookfrom - lookat).norm();
-    let aperature = 2.;
+    let dist_to_focus = 10.0;
+    let aperature = 0.1;
     let camera = Camera::new(&lookfrom, &lookat, &up, 20., nx as f32 / ny as f32, aperature, dist_to_focus);
 
     for j in (0..ny).rev() {
