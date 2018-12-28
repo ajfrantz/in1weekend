@@ -48,7 +48,12 @@ fn main() {
         Sphere { center: Vec3::new(-1., 0., -1.), radius: -0.45, material: Material::Dielectric { refraction_index: 1.5 } },
     ]};
 
-    let camera = Camera::new(&Vec3::new(-2., 2., 1.), &Vec3::new(0., 0., -1.), &Vec3::new(0., 1., 0.), 20., nx as f32 / ny as f32);
+    let lookfrom = Vec3::new(3., 3., 2.);
+    let lookat = Vec3::new(0., 0., -1.);
+    let up = Vec3::new(0., 1., 0.);
+    let dist_to_focus = (lookfrom - lookat).norm();
+    let aperature = 2.;
+    let camera = Camera::new(&lookfrom, &lookat, &up, 20., nx as f32 / ny as f32, aperature, dist_to_focus);
 
     for j in (0..ny).rev() {
         for i in 0..nx {
