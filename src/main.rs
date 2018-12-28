@@ -16,9 +16,19 @@ use self::vec3::Vec3;
 use self::ray::Ray;
 use self::sphere::Sphere;
 
+fn random_in_unit_sphere() -> Vec3 {
+    loop {
+        let p = 2.0 * Vec3::new(random::<f32>(), random::<f32>(), random::<f32>()) - Vec3::new(1., 1., 1.);
+        if p.squared_norm() < 1.0 {
+            return p;
+        }
+    }
+}
+
 fn color(r: &Ray, world: &HitableList) -> Vec3 {
-    if let Some(hit) = world.hit(r, 0.0, std::f32::MAX) {
-        0.5 * (hit.normal + 1.)
+    if let Some(hit) = world.hit(r, 0.001, std::f32::MAX) {
+        let target = hit.p + hit.normal + random_in_unit_sphere();
+        0.5 * color(&Ray { origin: hit.p, direction: target - hit.p }, world)
     } else {
         let unit_direction = r.direction.unit();
         let t = 0.5 * (unit_direction.y() + 1.0);
@@ -50,7 +60,8 @@ fn main() {
                 col += color(&r, &world);
             }
 
-            let color = col * (255.99 / ns as f32);
+            col /= ns as f32;
+            let color = 255.99 * Vec3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
             let ir = color.r() as i32;
             let ig = color.g() as i32;
             let ib = color.b() as i32;
