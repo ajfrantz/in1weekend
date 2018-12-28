@@ -4,10 +4,22 @@ mod ray;
 use self::vec3::Vec3;
 use self::ray::Ray;
 
+fn hit_sphere(center: &Vec3, radius: f32, r: &Ray) -> bool {
+    let oc = r.origin - *center;
+    let a = r.direction.dot(&r.direction);
+    let b = 2.0 * oc.dot(&r.direction);
+    let c = oc.dot(&oc) - radius * radius;
+    (b*b - 4.*a*c) > 0.
+}
+
 fn color(r: &Ray) -> Vec3 {
-    let unit_direction = r.direction.unit();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - t) * Vec3::new(1., 1., 1.) + t * Vec3::new(0.5, 0.7, 1.)
+    if hit_sphere(&Vec3::new(0., 0., -1.), 0.5, r) {
+        Vec3::new(1., 0., 0.)
+    } else {
+        let unit_direction = r.direction.unit();
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        (1.0 - t) * Vec3::new(1., 1., 1.) + t * Vec3::new(0.5, 0.7, 1.)
+    }
 }
 
 fn main() {
