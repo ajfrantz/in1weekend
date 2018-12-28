@@ -86,6 +86,15 @@ impl ops::AddAssign for Vec3 {
     }
 }
 
+impl ops::Add<f32> for Vec3 {
+    type Output = Vec3;
+    fn add(self, scalar: f32) -> Vec3 {
+        Vec3 {
+            e: [self.e[0] + scalar, self.e[1] + scalar, self.e[2] + scalar],
+        }
+    }
+}
+
 impl ops::Sub for Vec3 {
     type Output = Vec3;
     fn sub(self, other: Vec3) -> Vec3 {
