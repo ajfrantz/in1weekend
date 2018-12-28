@@ -1,4 +1,5 @@
 extern crate rand;
+extern crate rayon;
 
 mod camera;
 mod hitable;
@@ -9,6 +10,7 @@ mod sphere;
 mod vec3;
 
 use rand::prelude::*;
+use rayon::prelude::*;
 
 use self::camera::Camera;
 use self::hitable::Hitable;
@@ -75,8 +77,8 @@ fn main() {
     let aperature = 0.1;
     let camera = Camera::new(&lookfrom, &lookat, &up, 20., nx as f32 / ny as f32, aperature, dist_to_focus);
 
-    for j in (0..ny).rev() {
-        for i in 0..nx {
+    print!("{}", (0..ny).into_par_iter().rev().map(|j| {
+        (0..nx).map(|i| {
             let mut col = Vec3::new(0., 0., 0.);
             for _s in 0..ns {
                 let u = (i as f32 + random::<f32>()) / nx as f32;
@@ -90,7 +92,7 @@ fn main() {
             let ir = color.r() as i32;
             let ig = color.g() as i32;
             let ib = color.b() as i32;
-            println!("{} {} {}", ir, ig, ib);
-        }
-    }
+            format!("{} {} {}", ir, ig, ib)
+        }).collect::<Vec<String>>().join("\n")
+    }).collect::<Vec<String>>().join("\n"));
 }
